@@ -1,0 +1,50 @@
+// LeetCode 1390: Four Divisors
+// Approach: Use Sieve of Eratosthenes to identify primes and check numbers of form p^3 or p*q.
+// Time Complexity: O(n log log m + n√m)
+// Space Complexity: O(m)
+
+import java.util.*;
+class Solution {
+    private boolean[] s;
+    private void builds(int n){
+        s=new boolean[n+1];
+        Arrays.fill(s,true);
+        if(n>=0) s[0]=false;
+        if(n>=1) s[1]=false;
+        for(int i=2;i*i<=n;i++){
+            if(s[i]){
+                for (int j=i*i; j<=n; j+=i)
+                s[j]=false;
+            }
+        }
+    }
+    public int sumFourDivisors(int[] nums) {
+        int maxNum =0;
+        for(int x: nums){
+            if(x>maxNum) maxNum=x;
+        }
+        if(maxNum<2)
+        return 0;
+        builds(maxNum);
+        int total=0;
+        for(int x:nums){
+            // case p^3
+            int p=(int) Math.cbrt(x);
+            if((long)p*p*p==x && p>= 2 && p<s.length && s[p]){
+                total+= 1+p+p*p+x;
+                continue;
+            }
+            //case p*q
+            for(int i=2; i*i<=x; i++){
+                if(x % i==0){
+                    int j=x/i;
+                    if (i != j && i<s.length && j<s.length && s[i] && s[j]){
+                        total +=1+i+j+x;
+                    }
+                    break;
+                }
+            }
+        }
+        return total;
+    }
+}
