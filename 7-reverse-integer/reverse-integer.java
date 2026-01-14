@@ -1,13 +1,19 @@
 class Solution {
     public int reverse(int x) {
-        long rev=0;
-        while(x!=0){
-            int digit=x%10;
-            rev=rev*10+digit;
-            x=x/10;
+        long y = 0;
+        boolean isNegative = false;
+        if(x<0){
+            x = x*-1;
+            isNegative = true;
         }
-        if(rev>Integer.MAX_VALUE || rev<Integer.MIN_VALUE) return 0;
-
-        return (int)rev;
+        while(x > 0){
+            y = y*10 + x%10;
+            if (y < Integer.MIN_VALUE || y > Integer.MAX_VALUE)
+                return 0;
+            x = x/10;
+        }
+        if(isNegative)
+            return (int)(-y);
+        return (int)y;
     }
 }
