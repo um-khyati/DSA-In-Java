@@ -1,17 +1,33 @@
 class Solution {
-    private int maxLen(int[] Bars) {
-        int count = 2, length = 2;
-        for(int i = 1; i < Bars.length; i++) {
-            if(Bars[i] - Bars[i-1] == 1) count++;
-            else count = 2;
-            length = Math.max(length, count);
-        }
-        return length;
-    }
     public int maximizeSquareHoleArea(int n, int m, int[] hBars, int[] vBars) {
         Arrays.sort(hBars);
         Arrays.sort(vBars);
-        int side = Math.min(maxLen(hBars), maxLen(vBars));
-        return side * side; 
+
+        int maxiH = 1, maxiV = 1, maxi = 1;
+
+        for (int i = 1; i < hBars.length; i++) {
+            if (hBars[i] == hBars[i - 1] + 1) {
+                maxi++;
+            } else {
+                maxiH = Math.max(maxiH, maxi);
+                maxi = 1;
+            }
+        }
+        maxiH = Math.max(maxiH, maxi);
+
+        maxi = 1;
+
+        for (int i = 1; i < vBars.length; i++) {
+            if (vBars[i] == vBars[i - 1] + 1) {
+                maxi++;
+            } else {
+                maxiV = Math.max(maxiV, maxi);
+                maxi = 1;
+            }
+        }
+        maxiV = Math.max(maxiV, maxi);
+
+        int side = Math.min(maxiH+1, maxiV+1);
+        return side * side;
     }
 }
