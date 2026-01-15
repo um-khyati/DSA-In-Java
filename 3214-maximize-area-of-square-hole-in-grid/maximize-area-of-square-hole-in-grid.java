@@ -1,33 +1,33 @@
 class Solution {
     public int maximizeSquareHoleArea(int n, int m, int[] hBars, int[] vBars) {
+        
         Arrays.sort(hBars);
         Arrays.sort(vBars);
 
-        int maxiH = 1, maxiV = 1, maxi = 1;
+        int max_hori = 0;
+        int max_ver = 0;
+        int cnt =  0;
 
-        for (int i = 1; i < hBars.length; i++) {
-            if (hBars[i] == hBars[i - 1] + 1) {
-                maxi++;
-            } else {
-                maxiH = Math.max(maxiH, maxi);
-                maxi = 1;
-            }
+        for(int i=0;i<hBars.length-1;i++){
+
+            if(hBars[i+1]-hBars[i] == 1 ) cnt +=1;
+            else cnt=0;
+
+            max_hori = Math.max(max_hori,cnt);
         }
-        maxiH = Math.max(maxiH, maxi);
 
-        maxi = 1;
+        cnt = 0;
 
-        for (int i = 1; i < vBars.length; i++) {
-            if (vBars[i] == vBars[i - 1] + 1) {
-                maxi++;
-            } else {
-                maxiV = Math.max(maxiV, maxi);
-                maxi = 1;
-            }
+        for(int i=0;i<vBars.length-1;i++){
+
+            if(vBars[i+1]-vBars[i] == 1 ) cnt +=1;
+            else cnt=0;
+
+            max_ver = Math.max(max_ver,cnt);
         }
-        maxiV = Math.max(maxiV, maxi);
 
-        int side = Math.min(maxiH+1, maxiV+1);
-        return side * side;
+        int side = Math.min(max_hori,max_ver) + 2;
+
+        return side*side;
     }
 }
