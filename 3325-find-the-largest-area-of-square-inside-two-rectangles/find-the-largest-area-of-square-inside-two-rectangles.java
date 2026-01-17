@@ -1,25 +1,25 @@
 class Solution {
     public long largestSquareArea(int[][] bottomLeft, int[][] topRight) {
-        long maxSide = 0;
-        int n = bottomLeft.length;
 
-        for (int i = 0; i < n; i++) {
-            for (int j = i + 1; j < n; j++) {
-                int x1 = Math.max(bottomLeft[i][0], bottomLeft[j][0]);
-                int y1 = Math.max(bottomLeft[i][1], bottomLeft[j][1]);
-                int x2 = Math.min(topRight[i][0], topRight[j][0]);
-                int y2 = Math.min(topRight[i][1], topRight[j][1]);
+        long maxArea = 0;
+        int len = bottomLeft.length;
 
-                long width = x2 - x1;
-                long height = y2 - y1;
+        for (int p = 0; p < len; p++) {
+            for (int q = p + 1; q < len; q++) {
 
-                if (width > 0 && height > 0) {
-                    long side = Math.min(width, height);
-                    maxSide = Math.max(maxSide, side);
+                long leftX = Math.max(bottomLeft[p][0], bottomLeft[q][0]);
+                long rightX = Math.min(topRight[p][0], topRight[q][0]);
+
+                long lowerY = Math.max(bottomLeft[p][1], bottomLeft[q][1]);
+                long upperY = Math.min(topRight[p][1], topRight[q][1]);
+
+                if (leftX < rightX && lowerY < upperY) {
+                    long side = Math.min(rightX - leftX, upperY - lowerY);
+                    long area = side * side;
+                    maxArea = Math.max(maxArea, area);
                 }
             }
         }
-
-        return maxSide * maxSide;
+        return maxArea;
     }
 }
