@@ -1,51 +1,79 @@
 class Solution {
-    public int largestMagicSquare(int[][] grid) {
-        int n = grid.length;
-        int m = grid[0].length;
-        if (n < 2 || m < 2) return 1;
 
-        long[][] row = new long[n][m + 1];
-        long[][] col = new long[n + 1][m];
-        long[][] d1 = new long[n + 1][m + 2];
-        long[][] d2 = new long[n + 1][m + 2];
+    public int largestMagicSquare(int[][] mat) {
+        int R = mat.length;
+        int C = mat[0].length;
 
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < m; j++) {
-                row[i][j + 1] = row[i][j] + grid[i][j];
-                col[i + 1][j] = col[i][j] + grid[i][j];
-                d1[i + 1][j + 1] = d1[i][j] + grid[i][j];
-                d2[i + 1][j] = d2[i][j + 1] + grid[i][j];
+        // Row prefix sums
+        int[][] rowSum = new int[R][C];
+        for (int r = 0; r < R; r++) {
+            rowSum[r][0] = mat[r][0];
+            for (int c = 1; c < C; c++) {
+                rowSum[r][c] = rowSum[r][c - 1] + mat[r][c];
             }
         }
 
-        for (int k = Math.min(n, m); k > 1; k--) {
-            for (int r = 0; r <= n - k; r++) {
-                for (int c = 0; c <= m - k; c++) {
-                    long target = row[r][c + k] - row[r][c];
+        // Column prefix sums
+        int[][] colSum = new int[R][C];
+        for (int c = 0; c < C; c++) {
+            colSum[0][c] = mat[0][c];
+            for (int r = 1; r < R; r++) {
+                colSum[r][c] = colSum[r - 1][c] + mat[r][c];
+            }
+        }
 
-                    if (d1[r + k][c + k] - d1[r][c] != target) continue;
-                    if (d2[r + k][c] - d2[r][c + k] != target) continue;
+        int maxSize = 1;
 
-                    boolean match = true;
-                    for (int i = 0; i < k; i++) {
-                        if (row[r + i][c + k] - row[r + i][c] != target) {
-                            match = false;
-                            break;
-                        }
+        // Try every cell as top-left
+        for (int r = 0; r < R; r++) {
+            for (int c = 0; c < C; c++) {
+                int maxPossible = Math.min(R - r, C - c);
+
+                // Try bigger squares first
+                for (int size = maxPossible; size > maxSize; size--) {
+                    if (isMagic(r, c, size, mat, rowSum, colSum)) {
+                        maxSize = size;
+                        break;
                     }
-                    if (!match) continue;
-
-                    for (int j = 0; j < k; j++) {
-                        if (col[r + k][c + j] - col[r][c + j] != target) {
-                            match = false;
-                            break;
-                        }
-                    }
-
-                    if (match) return k;
                 }
             }
         }
-        return 1;
+        return maxSize;
+    }
+
+    private boolean isMagic(
+            int sr, int sc, int size,
+            int[][] mat, int[][] rowSum, int[][] colSum) {
+
+        // Target sum from first row
+        int target = rowSum[sr][sc + size - 1]
+                   - (sc > 0 ? rowSum[sr][sc - 1] : 0);
+
+        // Check rows
+        for (int r = sr; r < sr + size; r++) {
+            int sum = rowSum[r][sc + size - 1]
+                    - (sc > 0 ? rowSum[r][sc - 1] : 0);
+            if (sum != target) return false;
+        }
+
+        // Check columns
+        for (int c = sc; c < sc + size; c++) {
+            int sum = colSum[sr + size - 1][c]
+                    - (sr > 0 ? colSum[sr - 1][c] : 0);
+            if (sum != target) return false;
+        }
+
+        // Main diagonal
+        int d1 = 0;
+        for (int k = 0; k < size; k++)
+            d1 += mat[sr + k][sc + k];
+        if (d1 != target) return false;
+
+        // Anti-diagonal
+        int d2 = 0;
+        for (int k = 0; k < size; k++)
+            d2 += mat[sr + size - 1 - k][sc + k];
+
+        return d2 == target;
     }
 }
