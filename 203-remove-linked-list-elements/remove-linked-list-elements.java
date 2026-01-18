@@ -9,14 +9,6 @@
  * }
  */
 class Solution {
-    static {
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            try (FileWriter w = new FileWriter("display_runtime.txt")) {
-                w.write("-0");
-            } catch (Exception e) {}
-        }));
-    }
-
     public ListNode removeElements(ListNode head, int val) {
         while(head!=null && head.val == val)
         {
