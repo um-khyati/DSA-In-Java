@@ -1,47 +1,50 @@
 class Solution {
+    static class Edge {
+        int to;
+        int weight;
+        Edge(int to, int weight) {
+            this.to = to;
+            this.weight = weight;
+        }
+    }
     public int minCost(int n, int[][] edges) {
-        List<List<int[]>> adj = new ArrayList<>();
+        List<Edge>[] graph = new ArrayList[n];
 
         for(int i = 0; i < n; i++) {
-            adj.add(new ArrayList());
+            graph[i] = new ArrayList<>();
         }
 
-        for(int i = 0; i < edges.length; i++) {
-            int[] edge = edges[i];
+        for(int[] edge : edges) {
             int u = edge[0];
             int v = edge[1];
             int w = edge[2];
-
-            adj.get(u).add(new int[]{v, w});
-            adj.get(v).add(new int[]{u, 2*w});
+            graph[u].add(new Edge(v, w));
+            graph[v].add(new Edge(u, 2*w));
         }
 
+        int[] dist = new int[n]; 
+        Arrays.fill(dist, Integer.MAX_VALUE);
+        dist[0] = 0;
+
         PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> a[1] - b[1]);
-        int[] minCost = new int[n];
-        Arrays.fill(minCost, Integer.MAX_VALUE);
-
-        minCost[0] = 0;
-
         pq.add(new int[]{0, 0});
-
+        
         while(!pq.isEmpty()) {
-            int[] edge = pq.poll();
-            int from = edge[0];
-            int cost = edge[1];
+            int[] current = pq.poll();
+            int currentNode = current[0];
+            int distanceToCurrentNode = current[1];
             
-            if(from == n - 1) return cost;
-            if(minCost[from] < cost) continue;
-
-            for(int[] neighbor : adj.get(from)) {
-                int to = neighbor[0];
-                int toCost = neighbor[1];
-
-                if(minCost[from] + toCost < minCost[to]) {
-                    minCost[to] = minCost[from] + toCost;
-                    pq.add(new int[]{to, minCost[to]});
+            if(currentNode == n - 1) return distanceToCurrentNode;
+            for(Edge edge : graph[currentNode]) {
+                int nextNode = edge.to;
+                int weight = edge.weight;
+                if(dist[nextNode] > distanceToCurrentNode + weight) {
+                    dist[nextNode] = distanceToCurrentNode + weight;
+                    pq.add(new int[]{nextNode, dist[nextNode]});
                 }
             }
         }
-        return minCost[n-1] == Integer.MAX_VALUE ? -1 : minCost[n-1];
+        
+        return -1;
     }
 }
