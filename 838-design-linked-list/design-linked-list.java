@@ -1,77 +1,37 @@
+import java.util.LinkedList;
 class MyLinkedList {
-    class Node{
-        int val;
-        Node next;
-        Node(int val){
-            this.val=val;
-        }
-    }
-    private Node head;
-    private int size = 0;
-
+    LinkedList<Integer> obj;
     public MyLinkedList() {
-        head = new Node(0);
-        size = 0;  
+        obj=new LinkedList<>();
     }
     
     public int get(int index) {
-        if ( index<0 || index>=size){
+        if(index<0 ||index>=obj.size()){
             return -1;
         }
-        Node temp = head.next;
-        for(int i = 0; i<index; i++){
-            temp = temp.next;
-        }
-        return temp.val;
+        return obj.get(index);
     }
     
     public void addAtHead(int val) {
-        Node temp = new Node(val);
-        temp.next = head.next;
-        head.next = temp;
-        size++;
+        obj.addFirst(val);
     }
     
     public void addAtTail(int val) {
-        Node t= new Node(val);
-        Node temp=head;
-        while(temp.next!=null){
-            temp=temp.next;
-        }
-        temp.next=t;
-        t.next=null;
-        size++;
+        obj.addLast(val);
     }
     
     public void addAtIndex(int index, int val) {
-        if(index>size){
+        if(index>obj.size()){
             return;
         }
-        if(index==size){
-            addAtTail(val);
-            return;
-        }
-            Node temp=head;
-            Node t= new Node(val);
-            for(int i=0;i<index;i++){
-                temp=temp.next;
-            }
-            t.next=temp.next;
-            temp.next=t;
-            size++;
+        obj.add(index,val);
     }
     
     public void deleteAtIndex(int index) {
-        if(index<0 || index>=size){
+        if(index<0 || index>=obj.size()){
             return;
         }
-        Node temp=head;
-
-        for(int i=0;i<index;i++){
-            temp=temp.next;
-        }
-        temp.next=temp.next.next;
-        size--;
+        obj.remove(index);
     }
 }
 
