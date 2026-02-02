@@ -1,64 +1,72 @@
 class Solution {
-
     public long minimumCost(int[] nums, int k, int dist) {
-
         int n = nums.length;
-        long result = Long.MAX_VALUE;
-        long windowSum = 0L;
+        PriorityQueue<Integer> pq_left = new PriorityQueue<>((a, b)->b-a);
+        PriorityQueue<Integer> pq_right = new PriorityQueue<>();
+        Map<Integer, Integer> map = new HashMap<>();
+        int valid_left = 0;
+        long sum_left = 0;
 
-        java.util.TreeSet<Integer> using = new java.util.TreeSet<>(
-                (a, b) -> nums[a] == nums[b] ? a - b : nums[a] - nums[b]
-        );
+        long res = Long.MAX_VALUE;
 
-        java.util.TreeSet<Integer> waiting = new java.util.TreeSet<>(
-                (a, b) -> nums[a] == nums[b] ? a - b : nums[a] - nums[b]
-        );
+        for(int i=1; i<n; i++){
+            if(i>=dist+2){
+                int v = nums[i-dist-1];  
+                if(v<pq_left.peek()){
+                    map.merge(v, 1, Integer::sum);
+                    valid_left--;
+                    sum_left -= v;
+                }
+                else if(v==pq_left.peek()){
+                    pq_left.poll();
+                    valid_left--;
+                    sum_left -= v;
+                }
+                else if(v==pq_right.peek()){
+                    pq_right.poll();
+                }
+                else{
+                    map.merge(v, 1, Integer::sum);
+                }
+            }
+            if(i<=k-1 || nums[i]<=pq_left.peek()){
+                pq_left.offer(nums[i]);
+                valid_left++;
+                sum_left += nums[i];
+            }
+            else{
+                pq_right.offer(nums[i]);
+            }
 
-        for (int i = 1; i <= dist + 1; i++) {
-            using.add(i);
-            windowSum += nums[i];
-        }
-
-        while (using.size() > k - 1) {
-            int idx = using.pollLast();
-            windowSum -= nums[idx];
-            waiting.add(idx);
-        }
-
-        result = Math.min(result, windowSum);
-
-        for (int i = 1; i + dist + 1 < n; i++) {
-
-            waiting.add(i + dist + 1);
-
-            if (using.contains(i)) {
-                using.remove(i);
-                windowSum -= nums[i];
-
-                int idx = waiting.pollFirst();
-                using.add(idx);
-                windowSum += nums[idx];
-
-            } else {
-                waiting.remove(i);
-
-                int wMin = waiting.first();
-                int uMax = using.last();
-
-                if (nums[wMin] < nums[uMax]) {
-                    using.remove(uMax);
-                    waiting.add(uMax);
-                    windowSum -= nums[uMax];
-
-                    waiting.remove(wMin);
-                    using.add(wMin);
-                    windowSum += nums[wMin];
+            if(i>k-1){
+                if(valid_left<k-1){
+                    int v = pq_right.poll();
+                    pq_left.offer(v);
+                    valid_left++;
+                    sum_left += v;
+                }
+                else if(valid_left>k-1){
+                    int v = pq_left.poll();
+                    valid_left--;
+                    sum_left -= v;
+                    pq_right.offer(v);
                 }
             }
 
-            result = Math.min(result, windowSum);
-        }
 
-        return result + nums[0];
+            while(!pq_left.isEmpty() && map.getOrDefault(pq_left.peek(), 0)>0){
+                int v = pq_left.poll();
+                map.merge(v, -1, Integer::sum);
+            }
+            while(!pq_right.isEmpty() && map.getOrDefault(pq_right.peek(), 0)>0){
+                int v = pq_right.poll();
+                map.merge(v, -1, Integer::sum);
+            }
+
+            if(i>=dist+1){
+                res = Math.min(res, sum_left);
+            }
+        }
+        return res+nums[0];
     }
 }
