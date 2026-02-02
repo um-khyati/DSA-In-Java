@@ -1,72 +1,54 @@
 class Solution {
+
     public long minimumCost(int[] nums, int k, int dist) {
-        int n = nums.length;
-        PriorityQueue<Integer> pq_left = new PriorityQueue<>((a, b)->b-a);
-        PriorityQueue<Integer> pq_right = new PriorityQueue<>();
-        Map<Integer, Integer> map = new HashMap<>();
-        int valid_left = 0;
-        long sum_left = 0;
-
-        long res = Long.MAX_VALUE;
-
-        for(int i=1; i<n; i++){
-            if(i>=dist+2){
-                int v = nums[i-dist-1];  
-                if(v<pq_left.peek()){
-                    map.merge(v, 1, Integer::sum);
-                    valid_left--;
-                    sum_left -= v;
-                }
-                else if(v==pq_left.peek()){
-                    pq_left.poll();
-                    valid_left--;
-                    sum_left -= v;
-                }
-                else if(v==pq_right.peek()){
-                    pq_right.poll();
-                }
-                else{
-                    map.merge(v, 1, Integer::sum);
-                }
+        PriorityQueue<int[]> rest = new PriorityQueue<>(
+            (v1, v2) -> Integer.compare(v1[1], v2[1])
+        );
+        PriorityQueue<int[]> kMin = new PriorityQueue<>(
+            (v1, v2) -> {
+                int cmp = Integer.compare(v2[1], v1[1]);
+                // important for removing elements from the sliding window
+                if (cmp == 0) return Integer.compare(v1[0], v2[0]);
+                return cmp;
             }
-            if(i<=k-1 || nums[i]<=pq_left.peek()){
-                pq_left.offer(nums[i]);
-                valid_left++;
-                sum_left += nums[i];
-            }
-            else{
-                pq_right.offer(nums[i]);
-            }
-
-            if(i>k-1){
-                if(valid_left<k-1){
-                    int v = pq_right.poll();
-                    pq_left.offer(v);
-                    valid_left++;
-                    sum_left += v;
-                }
-                else if(valid_left>k-1){
-                    int v = pq_left.poll();
-                    valid_left--;
-                    sum_left -= v;
-                    pq_right.offer(v);
-                }
-            }
-
-
-            while(!pq_left.isEmpty() && map.getOrDefault(pq_left.peek(), 0)>0){
-                int v = pq_left.poll();
-                map.merge(v, -1, Integer::sum);
-            }
-            while(!pq_right.isEmpty() && map.getOrDefault(pq_right.peek(), 0)>0){
-                int v = pq_right.poll();
-                map.merge(v, -1, Integer::sum);
-            }
-
-            if(i>=dist+1){
-                res = Math.min(res, sum_left);
-            }
+        );
+        long kSum = 0;
+        for (int i = 1; i < k; i++) {
+            kMin.add(new int[] { i, nums[i] });
+            kSum += nums[i];
         }
-        return res+nums[0];
+        int end = k;
+        long sum = kSum;
+        while (end < nums.length) {
+            // start of the sliding window
+            int minAllowed = end - dist;
+            pop(rest, minAllowed);
+            rest.add(new int[] { end, nums[end] });
+            // sliding window longer than dist
+            if (minAllowed > 1) {
+                if (nums[minAllowed - 1] < kMin.peek()[1] || minAllowed - 1 == kMin.peek()[0]) {
+                    int[] moved = rest.poll();
+                    kMin.add(moved);
+                    kSum += moved[1] - nums[minAllowed - 1];
+                }
+            }
+            pop(rest, minAllowed);
+            pop(kMin, minAllowed);
+            // swap elements if nums[end] we included is smaller than one of kMin
+            if (rest.size() > 0 && rest.peek()[1] < kMin.peek()[1]) {
+                int[] rem = kMin.poll();
+                int[] add = rest.poll();
+                rest.add(rem);
+                kMin.add(add);
+                kSum += add[1] - rem[1];
+            }
+            sum = Math.min(sum, kSum);
+            end++;
+        }
+        return sum + nums[0];
+    }
+
+    private void pop(PriorityQueue<int[]> queue, int start) {
+        while (queue.size() > 0 && queue.peek()[0] < start) queue.poll();
     }
 }
