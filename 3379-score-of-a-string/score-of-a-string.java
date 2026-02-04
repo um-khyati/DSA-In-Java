@@ -1,9 +1,13 @@
 class Solution {
-    public int scoreOfString(String s) {
-        int total = 0;
-        for( int i = 0; i < s.length() - 1; i++){
-            total += Math.abs(s.charAt(i) - s.charAt(i + 1));
+    public int scoreOfString(String s) { 
+        return sumscore(s,0);
+    }
+
+    int sumscore(String s, int indx) {
+        if(indx == s.length() -1) {
+            return 0;
         }
-        return total;
+        int diff = Math.abs(s.charAt(indx + 1) - s.charAt(indx));
+        return diff + sumscore(s, indx + 1);
     }
 }
