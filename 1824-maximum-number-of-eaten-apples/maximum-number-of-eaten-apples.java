@@ -1,51 +1,24 @@
 class Solution {
     public int eatenApples(int[] apples, int[] days) {
-        PriorityQueue<Apple> minHeap = new PriorityQueue<Apple>((a, b) -> (a.validDay - b.validDay));
-        int currentDay = 1;
-        int eatenAppleCount = 0;
-        
-        for(int i = 0; i < apples.length; i++){
-            if(apples[i] > 0 && days[i] > 0) {
-                int validDay = currentDay + days[i] - 1;
-                
-                minHeap.add(new Apple(apples[i], validDay));
-            }
-            while(!minHeap.isEmpty()){
-                Apple apple = minHeap.remove();
-                
-                if(apple.validDay >= currentDay){
-                    apple.count--;
-                    eatenAppleCount++;
-                    if(apple.count > 0 && apple.validDay > currentDay){
-                        minHeap.add(apple);
-                    }
-                    
-                    break;
-                }
-            }
-            currentDay++;
-        }
-        while(!minHeap.isEmpty()){
-            Apple apple = minHeap.remove();
+        PriorityQueue<int[]> minHeap = new PriorityQueue<>((a, b) -> a[0] - b[0]);
 
-            if(apple.validDay >= currentDay){
-                apple.count--;
-                eatenAppleCount++;
-                if(apple.count > 0 && apple.validDay > currentDay){
-                    minHeap.add(apple);
-                }
-                currentDay++;
+        int count = 0, idx = 0, n = apples.length;
+
+        while (idx < n || !minHeap.isEmpty()) {
+
+            if (idx < n && apples[idx] > 0) minHeap.offer(new int[]{idx + days[idx], apples[idx]});
+
+            while (!minHeap.isEmpty() && minHeap.peek()[0] <= idx) minHeap.poll();
+
+            if (!minHeap.isEmpty()) {
+                if(--minHeap.peek()[1] == 0) minHeap.poll();
+                count++;
             }
+
+            idx++;
         }
-        return eatenAppleCount;
+
+        return count;
     }
-}
-class Apple {
-    int count;
-    int validDay;
-    
-    public Apple(int count, int validDay){
-        this.count = count;
-        this.validDay = validDay;
-    }
+
 }
