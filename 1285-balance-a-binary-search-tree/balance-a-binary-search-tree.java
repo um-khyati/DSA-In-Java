@@ -14,25 +14,25 @@
  * }
  */
 class Solution {
-    List<Integer> nums;
+    ArrayList<TreeNode> res = new ArrayList<TreeNode>();
     public TreeNode balanceBST(TreeNode root) {
-        nums = new ArrayList<Integer>();
-        getNumbers(root);
-        TreeNode res = balanceTree(0,nums.size()-1);
-        return res;
+        inorder(root);
+        return Build_BST(0, res.size() - 1);
     }
-    private void getNumbers(TreeNode node){
-        if(node==null) return;
-        getNumbers(node.left);
-        nums.add(node.val);
-        getNumbers(node.right);
+
+    public void inorder(TreeNode root ){
+         if(root == null) return;
+         inorder(root.left);
+         res.add(root);
+         inorder(root.right);
     }
-    private TreeNode balanceTree(int l, int r){
-        if(l>r)return null;
-        int middleIdx = l+ ((r-l)/2);
-        TreeNode res = new TreeNode(nums.get(middleIdx));
-        res.left = balanceTree(l,middleIdx-1);
-        res.right = balanceTree(middleIdx+1,r);
-        return res;
-    }              
+    
+    public TreeNode Build_BST( int start, int end){
+        if(start > end) return null;
+        int mid = (start + end) / 2;
+        TreeNode node = res.get(mid);
+        node.left = Build_BST( start, mid - 1);
+        node.right = Build_BST( mid + 1, end);
+        return node;
+    }
 }
