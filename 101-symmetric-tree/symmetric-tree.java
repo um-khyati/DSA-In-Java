@@ -27,9 +27,3 @@ class Solution {
     }
 }
 
-// base case:
-// if left == null && right == null: return true;
-// if left == null || right == null: return false
-
-// if left root != right root: return false
-// return isSymmetric(left.left, right.right) && isSymmetric(left.right, right.left) 
