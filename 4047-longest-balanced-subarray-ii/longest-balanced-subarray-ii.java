@@ -1,141 +1,102 @@
-import java.util.HashMap;
-import java.util.Map;
-
 class Solution {
-  public int longestBalanced(int[] nums) {
-    int result = 0;
-    Map<Integer, Integer> valueToPrevIndex = new HashMap<>();
-    LazySegTree lazySegTree = new LazySegTree(nums);
-    for (int r = 0; r < nums.length; ++r) {
-      int delta = (nums[r] % 2 == 0) ? 1 : -1;
 
-      if (valueToPrevIndex.containsKey(nums[r])) {
-        lazySegTree.update(0, valueToPrevIndex.get(nums[r]), -delta);
-      }
-      lazySegTree.update(0, r, delta);
-
-      valueToPrevIndex.put(nums[r], r);
-
-      int l = lazySegTree.findLeftmostZero();
-      if (l <= r) {
-        result = Math.max(result, r - l + 1);
-      }
+    static class Node {
+        int l, r;
+        int mn, mx;
+        int lazy;
     }
 
-    return result;
-  }
-}
+    static class SegmentTree {
+        Node[] tr;
 
-class LazySegTree {
-  Node root;
+        SegmentTree(int n) {
+            tr = new Node[n << 2];
+            for (int i = 0; i < tr.length; i++) {
+                tr[i] = new Node();
+            }
+            build(1, 0, n);
+        }
 
-  LazySegTree(int[] values) {
-    root = buildNode(values, 0, values.length - 1);
-  }
+        void build(int u, int l, int r) {
+            tr[u].l = l;
+            tr[u].r = r;
+            tr[u].mn = tr[u].mx = 0;
+            tr[u].lazy = 0;
+            if (l == r) return;
+            int mid = (l + r) >> 1;
+            build(u << 1, l, mid);
+            build(u << 1 | 1, mid + 1, r);
+        }
 
-  private Node buildNode(int[] values, int beginIndex, int endIndex) {
-    if (beginIndex == endIndex) {
-      return new Node(beginIndex, endIndex, 0, 0, 0, null, null);
+        void modify(int u, int l, int r, int v) {
+            if (tr[u].l >= l && tr[u].r <= r) {
+                apply(u, v);
+                return;
+            }
+            pushdown(u);
+            int mid = (tr[u].l + tr[u].r) >> 1;
+            if (l <= mid) modify(u << 1, l, r, v);
+            if (r > mid) modify(u << 1 | 1, l, r, v);
+            pushup(u);
+        }
+
+        int query(int u, int target) {
+            if (tr[u].l == tr[u].r) {
+                return tr[u].l;
+            }
+            pushdown(u);
+            int left = u << 1;
+            int right = u << 1 | 1;
+            if (tr[left].mn <= target && target <= tr[left].mx) {
+                return query(left, target);
+            }
+            return query(right, target);
+        }
+
+        void apply(int u, int v) {
+            tr[u].mn += v;
+            tr[u].mx += v;
+            tr[u].lazy += v;
+        }
+
+        void pushup(int u) {
+            tr[u].mn = Math.min(tr[u << 1].mn, tr[u << 1 | 1].mn);
+            tr[u].mx = Math.max(tr[u << 1].mx, tr[u << 1 | 1].mx);
+        }
+
+        void pushdown(int u) {
+            if (tr[u].lazy != 0) {
+                apply(u << 1, tr[u].lazy);
+                apply(u << 1 | 1, tr[u].lazy);
+                tr[u].lazy = 0;
+            }
+        }
     }
 
-    int middleIndex = (beginIndex + endIndex) / 2;
-    Node left = buildNode(values, beginIndex, middleIndex);
-    Node right = buildNode(values, middleIndex + 1, endIndex);
+    public int longestBalanced(int[] nums) {
+        int n = nums.length;
+        SegmentTree st = new SegmentTree(n);
+        Map<Integer, Integer> last = new HashMap<>();
+        int now = 0;
+        int ans = 0;
 
-    return new Node(
-        beginIndex,
-        endIndex,
-        0,
-        Math.min(left.min, right.min),
-        Math.max(left.max, right.max),
-        left,
-        right);
-  }
+        for (int i = 1; i <= n; i++) {
+            int x = nums[i - 1];
+            int det = (x & 1) == 1 ? 1 : -1;
 
-  void update(int beginIndex, int endIndex, int delta) {
-    update(beginIndex, endIndex, delta, root);
-  }
+            if (last.containsKey(x)) {
+                st.modify(1, last.get(x), n, -det);
+                now -= det;
+            }
 
-  private void update(int beginIndex, int endIndex, int delta, Node node) {
-    if (!(node.beginIndex > endIndex || node.endIndex < beginIndex)) {
-      if (node.beginIndex >= beginIndex && node.endIndex <= endIndex) {
-        node.apply(delta);
-      } else {
-        node.pushDown();
+            last.put(x, i);
+            st.modify(1, i, n, det);
+            now += det;
 
-        update(beginIndex, endIndex, delta, node.left);
-        update(beginIndex, endIndex, delta, node.right);
+            int pos = st.query(1, now);
+            ans = Math.max(ans, i - pos);
+        }
 
-        node.pull();
-      }
+        return ans;
     }
-  }
-
-  int findLeftmostZero() {
-    return findLeftmostZero(root);
-  }
-
-  private int findLeftmostZero(Node node) {
-    if (node.getComputedMinValue() > 0 || node.getComputedMaxValue() < 0) {
-      return Integer.MAX_VALUE;
-    }
-
-    if (node.beginIndex == node.endIndex) {
-      return (node.getComputedMinValue() == 0) ? node.beginIndex : Integer.MAX_VALUE;
-    }
-
-    node.pushDown();
-
-    node.pull();
-
-    int result = findLeftmostZero(node.left);
-
-    return (result == Integer.MAX_VALUE) ? findLeftmostZero(node.right) : result;
-  }
-
-  static class Node {
-    int beginIndex;
-    int endIndex;
-    int delta;
-    int min;
-    int max;
-    Node left;
-    Node right;
-
-    Node(int beginIndex, int endIndex, int delta, int min, int max, Node left, Node right) {
-      this.beginIndex = beginIndex;
-      this.endIndex = endIndex;
-      this.delta = delta;
-      this.min = min;
-      this.max = max;
-      this.left = left;
-      this.right = right;
-    }
-
-    int getComputedMinValue() {
-      return min + delta;
-    }
-
-    int getComputedMaxValue() {
-      return max + delta;
-    }
-
-    void pushDown() {
-      if (delta != 0) {
-        left.apply(delta);
-        right.apply(delta);
-
-        delta = 0;
-      }
-    }
-
-    void apply(int d) {
-      delta += d;
-    }
-
-    void pull() {
-      min = Math.min(left.getComputedMinValue(), right.getComputedMinValue());
-      max = Math.max(left.getComputedMaxValue(), right.getComputedMaxValue());
-    }
-  }
 }
