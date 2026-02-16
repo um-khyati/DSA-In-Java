@@ -12,7 +12,7 @@ private void backtrack(List<List<Integer>> list, List<Integer> tempList, int [] 
     else{ 
         for(int i = start; i < nums.length; i++){
             tempList.add(nums[i]);
-            backtrack(list, tempList, nums, remain - nums[i], i); // not i + 1 because we can reuse same elements
+            backtrack(list, tempList, nums, remain - nums[i], i); 
             tempList.remove(tempList.size() - 1);
         }
     }
