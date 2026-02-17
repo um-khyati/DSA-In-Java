@@ -1,20 +1,31 @@
 class Solution {
-    public List<String> readBinaryWatch(int k) {
-        if (k == 0) return List.of("0:00");
-        int mask = (1 << 6) - 1;
-        int q = (1 << k) - 1;
-        int limit = q << (10 - k);
-        List<String> res = new ArrayList<>();
+    public List<String> readBinaryWatch(int num) {
+        List<String> result = new ArrayList<>();
+        int[] arr = {1, 2, 4, 8, 1, 2, 4, 8, 16, 32};
+        backtrack(arr, 0, 0, 0, num, result);
+        return result;
+    }
 
-        while (q <= limit) {
-            int min = q & mask;
-            int hour = q >> 6;
-            if (hour < 12 && min < 60)
-                res.add(hour + ":" + (min < 10 ? "0" : "") + min);
-            int r = q & -q;
-            int n = q + r;
-            q = (((q ^ n) / r) >> 2) | n;
+    public void backtrack(int[] arr, int position, int hours, int minutes, int limit, List<String> result) {
+        if (limit == 0) {
+            if(hours <= 11 && minutes <= 59) {
+                StringBuilder builder = new StringBuilder();
+                builder.append(hours).append(":").append(minutes <= 9 ? "0" + minutes : minutes);
+                result.add(builder.toString());
+            }
+            return;
         }
-        return res;
+        for (int i = position; i < arr.length; i++) {
+            if (isHour(i)) hours += arr[i];
+            else minutes += arr[i];
+
+            backtrack(arr, i + 1, hours, minutes, limit - 1, result);
+
+            if (isHour(i)) hours -= arr[i];
+            else minutes -= arr[i];
+        }
+    }
+    public boolean isHour(int position) {
+        return position >= 0 && position <= 3;
     }
 }
