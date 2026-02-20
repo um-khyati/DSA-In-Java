@@ -9,19 +9,20 @@
  * }
  */
 class Solution {
+    static int[] mirror = new int[100000];
     public boolean isPalindrome(ListNode head) {
-        List<Integer> list = new ArrayList();
-        while(head != null) {
-            list.add(head.val);
-            head = head.next;
+        int i = 0;
+        ListNode pre = head;
+        while(pre != null){
+            mirror[i++] = pre.val;
+            pre = pre.next;
         }
         
-        int left = 0;
-        int right = list.size()-1;
-        while(left < right && list.get(left) == list.get(right)) {
-            left++;
-            right--;
+        int l = 0;
+         while (i > 0) {
+            if (mirror[l++] != mirror[--i])
+                return false;
         }
-        return left >= right;
+        return true;
     }
 }
