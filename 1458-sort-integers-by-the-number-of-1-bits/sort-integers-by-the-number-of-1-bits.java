@@ -1,22 +1,22 @@
 class Solution {
     public int[] sortByBits(int[] arr) {
-        Integer[] boxedarr = new Integer[arr.length];
-        for (int i = 0; i < arr.length; i++) {
-            boxedarr[i] = arr[i];
+        java.util.TreeMap<Integer, java.util.PriorityQueue<Integer>> bitmap = new java.util.TreeMap<>();
+        
+        for (int val : arr) {
+            int bits = Integer.bitCount(val);
+            bitmap.putIfAbsent(bits, new java.util.PriorityQueue<>());
+            bitmap.get(bits).add(val);
         }
         
-        java.util.Arrays.sort(boxedarr, (a, b) -> {
-            int counta = Integer.bitCount(a);
-            int countb = Integer.bitCount(b);
-            if (counta == countb) {
-                return a.compareTo(b);
+        int[] ans = new int[arr.length];
+        int index = 0;
+        
+        for (int key : bitmap.keySet()) {
+            java.util.PriorityQueue<Integer> pq = bitmap.get(key);
+            while (!pq.isEmpty()) {
+                ans[index++] = pq.poll();
             }
-            return Integer.compare(counta, countb);
-        });
-        
-        for (int i = 0; i < arr.length; i++) {
-            arr[i] = boxedarr[i];
         }
-        return arr;
+        return ans;
     }
 }
