@@ -1,9 +1,14 @@
 class Solution {
     public int minPartitions(String n) {
-        int ans = 0;
-        for (int i = 0; i < n.length(); ++i) {
-            ans = Math.max(ans, n.charAt(i) - '0');
+        int maxDigit = 0;
+        
+        for (char c : n.toCharArray()) {
+            maxDigit = Math.max(maxDigit, c - '0');
+            if (maxDigit == 9) {
+                return 9;
+            }
         }
-        return ans;
+        
+        return maxDigit;
     }
 }
