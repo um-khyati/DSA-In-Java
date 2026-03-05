@@ -1,15 +1,7 @@
 class Solution {
     public int fillCups(int[] amount) {
-        int count = 0;
-        while (true) {
-            Arrays.sort(amount);
-            if (amount[2] == 0) break;
-            amount[2]--;
-            if (amount[1] > 0) {
-                amount[1]--;
-            }
-            count++;
-        }
-        return count;
+        int cnt=amount[0]+amount[1]+amount[2];
+        int mx=Math.max(amount[0],Math.max(amount[1],amount[2]));
+        return Math.max(mx,(cnt+1)/2);
     }
 }
