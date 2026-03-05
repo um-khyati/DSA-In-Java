@@ -1,26 +1,56 @@
 class Solution {
     public int[] maxSubsequence(int[] nums, int k) {
-        int size=nums.length;
-        int sorted[]=Arrays.copyOf(nums, size);
-        Arrays.sort(sorted);
-        int threshold=sorted[size-k];
-        int thresholdCount=0;
-        for(int i=size-k;i<size;i++){
-            if(sorted[i]==threshold) thresholdCount++;
+        int n = nums.length;
+        int[] copy = Arrays.copyOf(nums, n);
+        int T = quickselect(copy, 0, n - 1, n - k);
+
+        int countGreater = 0, countEqual = 0;
+        for (int x : nums) {
+            if (x > T) countGreater++;
+            else if (x == T) countEqual++;
         }
-        int result[]=new int[k];
-        int index=0;
-        for(int num:nums){
-            if(num>threshold)
-            {
-                result[index++]=num;
+        int needEqual = k - countGreater;
+
+        int[] res = new int[k];
+        int idx = 0;
+        for (int x : nums) {
+            if (x > T) {
+                res[idx++] = x;
+            } else if (x == T && needEqual-- > 0) {
+                res[idx++] = x;
             }
-            else if(num==threshold && thresholdCount>0){
-                result[index++]=num;
-                thresholdCount--;
-            }
-            if(index == k) break;
+            if (idx == k) break;
         }
-        return result;
+        return res;
+    }
+    private int quickselect(int[] a, int left, int right, int kIndex) {
+        if (left == right) return a[left];
+        int pivotIndex = partition(a, left, right);
+        if (pivotIndex == kIndex) {
+            return a[pivotIndex];
+        } else if (pivotIndex < kIndex) {
+            return quickselect(a, pivotIndex + 1, right, kIndex);
+        } else {
+            return quickselect(a, left, pivotIndex - 1, kIndex);
+        }
+    }
+
+    private int partition(int[] a, int left, int right) {
+        int pivot = a[right];
+        int i = left;
+        for (int j = left; j < right; j++) {
+            if (a[j] <= pivot) {
+                swap(a, i, j);
+                i++;
+            }
+        }
+        swap(a, i, right);
+        return i;
+    }
+
+    private void swap(int[] a, int i, int j) {
+        int tmp = a[i];
+        a[i] = a[j];
+        a[j] = tmp;
     }
 }
