@@ -1,30 +1,46 @@
 class Solution {
-
+    private static final int MOD = (int) Math.pow(10, 9) + 7;
+    
     public int numberOfStableArrays(int zero, int one, int limit) {
-
-        int MOD = 1_000_000_007;
-
-        long[][][] dp = new long[zero+1][one+1][2];
-
-        for(int i=1;i<=Math.min(zero,limit);i++)
-            dp[i][0][0]=1;
-
-        for(int j=1;j<=Math.min(one,limit);j++)
-            dp[0][j][1]=1;
-
-        for(int i=1;i<=zero;i++)
-        for(int j=1;j<=one;j++){
-
-            long over0 = (i-limit>=1)?dp[i-limit-1][j][1]:0;
-            long over1 = (j-limit>=1)?dp[i][j-limit-1][0]:0;
-
-            dp[i][j][0] =
-            (dp[i-1][j][0]+dp[i-1][j][1]-over0+MOD)%MOD;
-
-            dp[i][j][1] =
-            (dp[i][j-1][0]+dp[i][j-1][1]-over1+MOD)%MOD;
+        if(zero > one) {
+            return numberOfStableArrays(one, zero, limit);
         }
+        int[] zeroPartitions = getNumPartitions(zero, limit, zero);
+        int[] onePartitions = getNumPartitions(one, limit, zero+1);
+        long res = 0;
+        for(int i = 1; i <= zero; i++) {
+            long oneChoices = (i > 1 ? onePartitions[i-1] : 0) + (long) 2*onePartitions[i] + (i+1 <= one ? onePartitions[i+1] : 0);
+            oneChoices %= MOD;
+            res += zeroPartitions[i] * oneChoices;
+            res %= MOD;
+        }
+        return (int) res;
+    }
 
-        return (int)((dp[zero][one][0]+dp[zero][one][1])%MOD);
+    private int[] getNumPartitions(int n, int limit, int maxGroups) {
+        int[] res = new int[Math.min(n, maxGroups)+1];
+        int[] prev = new int[n+1];
+        int[] cur = new int[n+1];
+        prev[0] = 1;
+        for(int numGroups = 1; numGroups <= Math.min(n, maxGroups); numGroups++) {
+            cur[0] = 0;
+            for(int sum = 1; sum <= n; sum++) {
+                cur[sum] = cur[sum-1] + prev[sum-1];
+                if(sum > limit) {
+                    cur[sum] -= prev[sum-limit-1];
+                }
+                if(cur[sum] < 0) {
+                    cur[sum] += MOD;
+                }
+                else if(cur[sum] >= MOD) {
+                    cur[sum] -= MOD;
+                }
+            }
+            res[numGroups] = cur[n];
+            int[] temp = prev;
+            prev = cur;
+            cur = temp;
+        }
+        return res;
     }
 }
