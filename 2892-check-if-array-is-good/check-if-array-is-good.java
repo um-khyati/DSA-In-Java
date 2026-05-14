@@ -1,10 +1,22 @@
 class Solution {
     public boolean isGood(int[] nums) {
-        Arrays.sort(nums);
-        int countDub=0,n=nums.length;
-        for(int i=0;i<n-1;i++){
-            if(nums[i]!=i+1)return false;
+        int n = nums.length - 1;
+
+        int[] frequencies = new int[n];
+        for(int number: nums) {
+            if (number < 1 || number > n) {
+                return false;
+            }
+            frequencies[number - 1]++;
+        } 
+        for(int i = 0; i < n - 1; ++i) {
+            if (frequencies[i] != 1) {
+                return false;
+            }
         }
-        return nums[n-1]==n-1;
+        if (frequencies[n - 1] != 2) {
+            return false;
+        }
+        return true;
     }
 }
