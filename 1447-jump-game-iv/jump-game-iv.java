@@ -1,55 +1,46 @@
 class Solution {
     public int minJumps(int[] arr) {
-        int n = arr.length;
-
-        if (n == 1) return 0;
+        int n = arr.length, step = 0;
+        if(n == 1) return 0;
 
         Map<Integer, List<Integer>> map = new HashMap<>();
-
-        for (int i = 0; i < n; i++) {
-            map.computeIfAbsent(arr[i], k -> new ArrayList<>()).add(i);
-        }
-
-        Queue<Integer> q = new ArrayDeque<>();
+        for(int i = 0; i < n; i++)
+            map.computeIfAbsent(arr[i], k->new ArrayList<>()).add(i);
+        
+        Queue<Integer> q = new LinkedList<>();
         boolean[] vis = new boolean[n];
-
+        
         q.offer(0);
         vis[0] = true;
 
-        int steps = 0;
-
-        while (!q.isEmpty()) {
+        while(!q.isEmpty()) {
             int size = q.size();
+            step++;
 
-            while (size-- > 0) {
-                int i = q.poll();
+            for(int i = 0; i < size; i++) {
+                int curId = q.poll();
 
-                if (i == n - 1) return steps;
-
-                if (i + 1 < n && !vis[i + 1]) {
-                    vis[i + 1] = true;
-                    q.offer(i + 1);
-                }
-
-                if (i - 1 >= 0 && !vis[i - 1]) {
-                    vis[i - 1] = true;
-                    q.offer(i - 1);
-                }
-
-                List<Integer> next = map.remove(arr[i]);
-
-                if (next != null) {
-                    for (int idx : next) {
-                        if (!vis[idx]) {
-                            vis[idx] = true;
-                            q.offer(idx);
-                        }
+                int[] nextPos = {curId+1, curId-1};
+                for(int nextId : nextPos) {
+                    if(nextId == n-1) return step;
+                    if(nextId >= 0 && nextId < n && !vis[nextId]) {
+                        vis[nextId] = true;
+                        q.offer(nextId); 
                     }
                 }
+                if(map.get(arr[curId]) != null) {
+                    for(int nextId : map.get(arr[curId])){
+                        if(nextId == n-1) return step;
+                        if(!vis[nextId]) {
+                            vis[nextId] = true;
+                            q.offer(nextId);
+                        }
+                    }
+                    map.remove(arr[curId]);
+                }
             }
-
-            steps++;
         }
-        return -1;
+
+        return step;
     }
 }
