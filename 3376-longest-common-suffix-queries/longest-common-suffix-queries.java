@@ -1,76 +1,51 @@
 class Solution {
-
-    static class Node {
-        int[] child;
+    class TrieNode {
+        TrieNode[] child=new TrieNode[26];
         int idx;
-
-        Node() {
-            child = new int[26];
-            Arrays.fill(child, -1);
+        int len;
+        TrieNode() {
             idx = -1;
+            len = Integer.MAX_VALUE;
         }
     }
-
-    List<Node> trie = new ArrayList<>();
-    void updateIndex(int storedIdx,int newIdx,String[] wordsContainer,int node) {
-        if(storedIdx == -1) {
-            trie.get(node).idx = newIdx;
-            return;
+    public int[] stringIndices(String[] wordsContainer, String[] wordsQuery) {
+        TrieNode root = new TrieNode();
+        for (int i = 0; i < wordsContainer.length; i++) {
+            insert(root, wordsContainer[i], i);
         }
-
-        int oldLen =wordsContainer[storedIdx].length();
-        int newLen =wordsContainer[newIdx].length();
-
-        if(newLen < oldLen) {
-            trie.get(node).idx = newIdx;
+        int[] ans = new int[wordsQuery.length];
+        for (int i = 0; i < wordsQuery.length; i++) {
+            ans[i] = search(root, wordsQuery[i]);
         }
-        else if(newLen == oldLen && newIdx < storedIdx) {
-            trie.get(node).idx = newIdx;
-        }
-    }
-
-    public int[] stringIndices(String[] wordsContainer,String[] wordsQuery) {
-        trie.add(new Node()); 
-        for(int i = 0;i < wordsContainer.length;i++) {
-
-            String word =new StringBuilder(wordsContainer[i]).reverse().toString();
-
-            int node = 0;
-            updateIndex(trie.get(node).idx,i,wordsContainer,node);
-
-            for(char ch : word.toCharArray()) {
-                int c = ch - 'a';
-
-                if(trie.get(node).child[c] == -1) {
-                    trie.get(node).child[c] =trie.size();
-                    trie.add(new Node());
-                }
-
-                node = trie.get(node).child[c];
-
-                updateIndex(trie.get(node).idx,i,wordsContainer,node);
-            }
-        }
-
-        int[] ans =new int[wordsQuery.length];
-        for(int i = 0;i < wordsQuery.length;i++) {
-
-            String query =new StringBuilder(wordsQuery[i]).reverse().toString();
-
-            int node = 0;
-
-            for(char ch : query.toCharArray()) {
-                int c = ch - 'a';
-
-                if(trie.get(node).child[c] == -1) {
-                    break;
-                }
-                node = trie.get(node).child[c];
-            }
-
-            ans[i] = trie.get(node).idx;
-        }
-
         return ans;
+    }
+    private void insert(TrieNode root, String word, int index) {
+        TrieNode curr = root;
+        update(curr, word.length(), index);
+        for (int i = word.length() - 1; i >= 0; i--) {
+            int idx = word.charAt(i) - 'a';
+            if (curr.child[idx] == null) {
+                curr.child[idx] = new TrieNode();
+            }
+            curr = curr.child[idx];
+            update(curr, word.length(), index);
+        }
+    }
+    private void update(TrieNode node, int len, int idx) {
+        if (len < node.len) {
+            node.len = len;
+            node.idx = idx;
+        }
+    }
+     private int search(TrieNode root, String word) {
+        TrieNode curr = root;
+        for (int i = word.length() - 1; i >= 0; i--) {
+            int idx = word.charAt(i) - 'a';
+            if (curr.child[idx] == null) {
+                break;
+            }
+            curr = curr.child[idx];
+        }
+        return curr.idx;
     }
 }
