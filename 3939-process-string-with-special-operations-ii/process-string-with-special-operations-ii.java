@@ -1,42 +1,41 @@
 class Solution {
     public char processStr(String s, long k) {
-        int n = s.length();
-        long[] len = new long[n];
-        long cur = 0;
 
-        for (int i = 0; i < n; i++) {
-            char ch = s.charAt(i);
+        char[] a = s.toCharArray();
+        long totalLen = 0;
+        for (int i = 0; i < a.length; i++) {
+            if (a[i] == '*') {
+                if (totalLen >= 1)
+                    totalLen -= 1;
+            } else if (a[i] == '#') {
+                totalLen = totalLen + totalLen;
+            } else if (a[i] == '%') {
 
-            if (ch >= 'a' && ch <= 'z') {
-                cur++;
-            } 
-            else if (ch == '*') {
-                if (cur > 0) cur--;
-            } 
-            else if (ch == '#') {
-                cur = Math.min(cur * 2, (long)1e15);
-            }
-
-            len[i] = cur;
-        }
-
-        if (k >= cur) return '.';
-
-        for (int i = n - 1; i >= 0; i--) {
-            char ch = s.charAt(i);
-
-            if (ch >= 'a' && ch <= 'z') {
-                if (len[i] - 1 == k) return ch;
-            } 
-            else if (ch == '#') {
-                long prev = len[i] / 2;
-                if (k >= prev) k -= prev;
-            } 
-            else if (ch == '%') {
-                k = len[i] - 1 - k;
+            } else {
+                totalLen++;
             }
         }
 
+        if (k >= totalLen)
+            return '.';
+
+        for (int i = a.length - 1; i >= 0; i--) {
+            if (a[i] == '*') {
+                totalLen += 1;
+            } else if (a[i] == '#') {
+                if (k >= totalLen / 2) {
+                    k -= totalLen / 2;
+                }
+                totalLen = totalLen / 2;
+            } else if (a[i] == '%') {
+                k = (totalLen - 1) - k;
+            } else {
+                if (k == totalLen - 1) {
+                    return a[i];
+                }
+                totalLen -= 1;
+            }
+        }
         return '.';
     }
 }
