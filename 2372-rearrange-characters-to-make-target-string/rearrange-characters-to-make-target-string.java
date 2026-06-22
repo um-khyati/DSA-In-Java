@@ -1,26 +1,18 @@
 class Solution {
-    public int rearrangeCharacters(String s, String target) {
-        HashMap<Character, Integer> freq = new HashMap<>();
-        HashMap<Character, Integer> ft = new HashMap<>();
+  public int rearrangeCharacters(String s, String target) {
+    int ans = s.length();
+    int[] countS = new int[128];
+    int[] countT = new int[128];
 
-        for (char ch : target.toCharArray()) {
-            ft.put(ch, ft.getOrDefault(ch, 0) + 1);
-        }
+    for (final char c : s.toCharArray())
+      ++countS[c];
 
-        for (char ch : s.toCharArray()) {
-            freq.put(ch, freq.getOrDefault(ch, 0) + 1);
-        }
+    for (final char c : target.toCharArray())
+      ++countT[c];
 
-        int answer = Integer.MAX_VALUE;
+    for (final char c : target.toCharArray())
+      ans = Math.min(ans, countS[c] / countT[c]);
 
-        for (char ch : target.toCharArray()) {
-            if (!freq.containsKey(ch)) {
-                return 0;
-            }
-
-            answer = Math.min(answer, freq.get(ch) / ft.get(ch));
-        }
-
-        return answer;
-    }
+    return ans;
+  }
 }
