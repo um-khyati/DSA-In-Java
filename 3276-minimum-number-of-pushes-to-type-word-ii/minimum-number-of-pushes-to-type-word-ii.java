@@ -1,23 +1,16 @@
 class Solution {
     public int minimumPushes(String word) {
-        int minPushCount = 0;
-
-        int[] charCount = new int[26];
-
-        for (int i = 0; i < word.length(); i++) {
-            charCount[word.charAt(i) - 'a']++;
+        int ans=0;
+        int[] fre=new int[26];
+        int n=word.length();
+        for(int i=0;i<n;i++){
+            char ch=word.charAt(i);
+            fre[ch-'a']++;
         }
-
-        charCount = Arrays.stream(charCount)
-                .boxed()
-                .sorted(Collections.reverseOrder())
-                .mapToInt(i -> i)
-                .toArray();
-
-        for (int i = 0; i < charCount.length; i++) {
-            minPushCount += charCount[i] * (i / 8 + 1);
+        Arrays.sort(fre);
+        for(int i=25;i>=0;i--){
+            ans+=fre[i]*((25-i)/8+1);
         }
-
-        return minPushCount;
+        return ans;
     }
 }
