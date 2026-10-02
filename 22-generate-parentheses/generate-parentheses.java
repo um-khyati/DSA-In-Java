@@ -1,23 +1,29 @@
-class Solution {
-    
-    public List<String> generateParenthesis(int n) {
-        List<String> result = new ArrayList<>();
-        backtrack(result, "", 0, 0, n);
-        return result;
-    }
-    
-    private void backtrack(List<String> result, String current,
-                           int open, int close, int n) {
+import java.util.*;
 
-        if (current.length() == 2 * n) {
-            result.add(current);
+class Solution {
+    public List<String> generateParenthesis(int n) {
+        List<String> ans = new ArrayList<>();
+        char[] s = new char[2 * n];
+        solve(ans, s, 0, 0, 0, n);
+        return ans;
+    }
+
+    private void solve(List<String> ans, char[] s, int pos,
+                       int open, int close, int n) {
+
+        if (pos == s.length) {
+            ans.add(new String(s));
             return;
         }
+
         if (open < n) {
-            backtrack(result, current + "(", open + 1, close, n);
+            s[pos] = '(';
+            solve(ans, s, pos + 1, open + 1, close, n);
         }
+
         if (close < open) {
-            backtrack(result, current + ")", open, close + 1, n);
+            s[pos] = ')';
+            solve(ans, s, pos + 1, open, close + 1, n);
         }
     }
 }
