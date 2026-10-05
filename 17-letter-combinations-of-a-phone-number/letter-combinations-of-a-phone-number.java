@@ -1,21 +1,24 @@
 class Solution {
-    public List<String> letterCombinations(String digits) {
-        if (digits.isEmpty()) return Collections.emptyList();
-
-        String[] phone_map = {"abc", "def", "ghi", "jkl", "mno", "pqrs", "tuv", "wxyz"};
-        List<String> output = new ArrayList<>();
-        backtrack("", digits, phone_map, output);
-        return output;
-    }
-
-    private void backtrack(String combination, String next_digits, String[] phone_map, List<String> output) {
-        if (next_digits.isEmpty()) {
-            output.add(combination);
-        } else {
-            String letters = phone_map[next_digits.charAt(0) - '2'];
-            for (char letter : letters.toCharArray()) {
-                backtrack(combination + letter, next_digits.substring(1), phone_map, output);
-            }
+    private String[] digitToChar = {
+        "abc", "def", "ghi", "jkl", "mno", "qprs", "tuv", "wxyz"
+    };
+    private void dfs(String digits, int index, StringBuilder combination, List<String> result) {
+        if(combination.length() == digits.length()) {
+            result.add(combination.toString());
+            return;
         }
+        String current = digitToChar[digits.charAt(index) - '2'];
+        for(int i=0; i<current.length(); i++) {
+            combination.append(current.charAt(i));
+            dfs(digits, index + 1, combination, result);
+            combination.deleteCharAt(combination.length() - 1);
+        }
+        return;
+    }
+    public List<String> letterCombinations(String digits) {
+        List<String> result = new ArrayList<>();
+        StringBuilder combination = new StringBuilder();
+        dfs(digits, 0, combination, result);
+        return result;
     }
 }
