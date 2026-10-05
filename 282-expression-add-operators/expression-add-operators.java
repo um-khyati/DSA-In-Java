@@ -1,29 +1,49 @@
 class Solution {
     public List<String> addOperators(String num, int target) {
-        List<String>ans=new ArrayList<>();
-        solve(0,num,target,"",ans,0,0);
-        return ans;
+        List<String> result = new ArrayList<>();
+        if (num == null || num.length() == 0) return result;
+
+        char[] path = new char[num.length() * 2];
+        
+        backtrack(result, path, num, target, 0, 0, 0, 0);
+        return result;
     }
-    private void solve(int index,String num,int target,String curr,List<String>ans,long prev,long res){
-        if(index==num.length()){
-            if(res==target){
-                ans.add(curr);
+
+    private void backtrack(List<String> result, char[] path, String num, 
+                           int target, int index, int len, long evalValue, long prevValue) {
+
+        if (index == num.length()) {
+            if (evalValue == target) {
+                result.add(new String(path, 0, len));
             }
             return;
         }
-        String st="";
-        long curres=0;
-        for(int i=index;i<num.length();i++){
-            if(i>index && num.charAt(index)=='0')break;
-            st+=num.charAt(i);
-            curres=curres*10+(num.charAt(i)-'0');
-            if(index==0){
-                solve(i+1,num,target,st,ans,curres,curres);
-            }
-            else{
-                solve(i+1,num,target,curr+"+"+st,ans,curres,res+curres);
-                solve(i+1,num,target,curr+"-"+st,ans,-curres,res-curres);
-                solve(i+1,num,target,curr+"*"+st,ans,prev*curres,res-prev+(prev*curres));
+
+        long curr = 0;
+        int signIndex = len; 
+        if (index != 0) {
+            len++;
+        }
+
+        for (int i = index; i < num.length(); i++) {
+            if (i != index && num.charAt(index) == '0') break;
+
+            curr = curr * 10 + (num.charAt(i) - '0');
+            
+            path[len++] = num.charAt(i);
+
+            if (index == 0) {
+                backtrack(result, path, num, target, i + 1, len, curr, curr);
+            } else {
+                path[signIndex] = '+';
+                backtrack(result, path, num, target, i + 1, len, evalValue + curr, curr);
+
+                path[signIndex] = '-';
+                backtrack(result, path, num, target, i + 1, len, evalValue - curr, -curr);
+
+                path[signIndex] = '*';
+                backtrack(result, path, num, target, i + 1, len, 
+                          evalValue - prevValue + (prevValue * curr), prevValue * curr);
             }
         }
     }
