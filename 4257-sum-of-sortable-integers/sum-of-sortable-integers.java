@@ -1,45 +1,74 @@
 class Solution {
-    private boolean check(int[] nums, int k) {
-        int n = nums.length, prev = 0;
-
-        for (int i = 0; i < n; i += k) {
-            int cnt = 0;
-            int mini = nums[i], maxi = nums[i];
-
-            for (int j = i; j < i + k - 1; j++) {
-                if (nums[j] > nums[j + 1])
-                    cnt++;
-
-                mini = Math.min(mini, nums[j + 1]);
-                maxi = Math.max(maxi, nums[j + 1]);
-            }
-
-            if (nums[i + k - 1] > nums[i])
-                cnt++;
-
-            if (cnt > 1 || prev > mini)
-                return false;
-
-            prev = maxi;
-        }
-
-        return true;
-    }
-
     public int sortableIntegers(int[] nums) {
-        int n = nums.length, ans = 0;
 
-        for (int k = 1; k * k <= n; k++) {
-            if (n % k == 0) {
-                if (check(nums, k))
-                    ans += k;
+        int n = nums.length;
 
-                int other = n / k;
-                if (other != k && check(nums, other))
-                    ans += other;
+        int[] prefixMax = new int[n];
+        int[] suffixMin = new int[n];
+        int[] drops = new int[n];
+
+        prefixMax[0] = nums[0];
+
+        for (int i = 1; i < n; i++) {
+            prefixMax[i] = Math.max(prefixMax[i - 1], nums[i]);
+        }
+
+        suffixMin[n - 1] = nums[n - 1];
+
+        for (int i = n - 2; i >= 0; i--) {
+            suffixMin[i] = Math.min(suffixMin[i + 1], nums[i]);
+        }
+
+        for (int i = 1; i < n; i++) {
+            drops[i] = drops[i - 1];
+
+            if (nums[i - 1] > nums[i]) {
+                drops[i]++;
             }
         }
 
-        return ans;
+        int answer = 0;
+
+        for (int k = 1; k <= n; k++) {
+
+            if (n % k != 0) {
+                continue;
+            }
+
+            boolean possible = true;
+            for (int i = k; i < n; i += k) {
+                if (prefixMax[i - 1] > suffixMin[i]) {
+                    possible = false;
+                    break;
+                }
+            }
+
+            if (!possible) {
+                continue;
+            }
+            for (int start = 0; start < n; start += k) {
+
+                int end = start + k - 1;
+
+                int insideDrops = drops[end] - drops[start];
+
+                int circularDrop = 0;
+
+                if (nums[end] > nums[start]) {
+                    circularDrop = 1;
+                }
+
+                if (insideDrops + circularDrop > 1) {
+                    possible = false;
+                    break;
+                }
+            }
+
+            if (possible) {
+                answer += k;
+            }
+        }
+
+        return answer;
     }
 }
