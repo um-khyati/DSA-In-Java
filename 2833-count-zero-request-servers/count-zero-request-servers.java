@@ -1,45 +1,25 @@
 class Solution {
     public int[] countServers(int n, int[][] logs, int x, int[] queries) {
-        Arrays.sort(logs, (a, b) -> Integer.compare(a[1], b[1]));
-
-        int[][] orderedQueries = new int[queries.length][2];
-        for (int i = 0; i < queries.length; i++) {
-            orderedQueries[i][0] = queries[i];
-            orderedQueries[i][1] = i;
-        }
-        Arrays.sort(orderedQueries, (a, b) -> Integer.compare(a[0], b[0]));
-
-        int[] frequency = new int[n + 1];
-        int[] answer = new int[queries.length];
-
-        int active = 0, left = 0, right = 0;
-
-        for (int[] query : orderedQueries) {
-            int q = query[0];
-            int originalIndex = query[1];
-            int lower = q - x;
-
-            while (right < logs.length && logs[right][1] <= q) {
-                int server = logs[right][0];
-                if (frequency[server] == 0) {
-                    active++;
-                }
-                frequency[server]++;
-                right++;
+        Arrays.sort(logs, (a, b) -> a[1] - b[1]);
+        int q = queries.length;
+        Integer[] order = new Integer[q];
+        for (int i = 0; i < q; i++) order[i] = i;
+        Arrays.sort(order, (a, b) -> queries[a] - queries[b]);
+        int[] cnt = new int[n + 1];
+        int active = 0, l = 0, r = 0;
+        int[] ans = new int[q];
+        for (int qi : order) {
+            int time = queries[qi];
+            while (r < logs.length && logs[r][1] <= time) {
+                if (cnt[logs[r][0]]++ == 0) active++;
+                r++;
             }
-
-            while (left < right && logs[left][1] < lower) {
-                int server = logs[left][0];
-                frequency[server]--;
-                if (frequency[server] == 0) {
-                    active--;
-                }
-                left++;
+            while (l < r && logs[l][1] < time - x) {
+                if (--cnt[logs[l][0]] == 0) active--;
+                l++;
             }
-
-            answer[originalIndex] = n - active;
+            ans[qi] = n - active;
         }
-
-        return answer;
+        return ans;
     }
 }
