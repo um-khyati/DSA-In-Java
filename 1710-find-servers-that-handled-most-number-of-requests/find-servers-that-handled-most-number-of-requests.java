@@ -1,28 +1,35 @@
 class Solution {
     public List<Integer> busiestServers(int k, int[] arrival, int[] load) {
-        TreeSet<Integer> free = new TreeSet<>();
-        for (int i = 0; i < k; i++) free.add(i);
-        PriorityQueue<long[]> busy = new PriorityQueue<>((a, b) -> Long.compare(a[0], b[0]));
-        int[] cnt = new int[k];
-        int n = arrival.length;
-        for (int i = 0; i < n; i++) {
-            long t = arrival[i];
-            while (!busy.isEmpty() && busy.peek()[0] <= t) {
-                free.add((int) busy.poll()[1]);
-            }
-            if (free.isEmpty()) continue;
-            int pref = i % k;
-            Integer s = free.ceiling(pref);
-            if (s == null) s = free.first();
-            free.remove(s);
-            cnt[s]++;
-            busy.offer(new long[]{t + load[i], s});
+        Queue<Integer> free = new PriorityQueue<>();
+        Queue<int[]> busy = new PriorityQueue<>((a, b) -> a[1] - b[1]);
+        int[] worker = new int[k];
+        int maxRequest = 0;
+
+        for(int i=0; i<k; i++) {
+            free.offer(i);
         }
-        int mx = 0;
-        for (int c : cnt) mx = Math.max(mx, c);
-        List<Integer> ans = new ArrayList<>();
-        for (int i = 0; i < k; i++)
-            if (cnt[i] == mx) ans.add(i);
-        return ans;
+        int K = 0;
+        for(int i=0; i<arrival.length; i++) {
+            int startTime = arrival[i];
+            int endTime = arrival[i] + load[i];
+            while(!busy.isEmpty() && busy.peek()[1] <= startTime) {
+                int[] server = busy.poll();
+                int modifiedId = i + ((server[0] - i) % k + k) % k; 
+                free.offer(modifiedId);
+            }
+            if(!free.isEmpty()) {
+                int server = free.poll();
+                worker[server % k] += 1;
+                busy.offer(new int[] {server, endTime});
+                maxRequest = Math.max(maxRequest, worker[server % k]);
+            }
+        }
+        List<Integer> busiestServerList = new LinkedList<>();
+        for(int i=0; i<worker.length; i++) {
+            if(worker[i] == maxRequest) {
+                busiestServerList.add(i);
+            }
+        }
+        return busiestServerList;
     }
 }
