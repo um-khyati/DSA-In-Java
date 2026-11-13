@@ -1,32 +1,27 @@
-
 class Solution {
     public long countNonDecreasingSubarrays(int[] nums, int k) {
-        int n = nums.length, j = n - 1;
-        long ans = 0, cost = 0;
-        Deque<int[]> dq = new ArrayDeque<>();
-
-        for (int i = n - 1; i >= 0; i--) {
-            int cnt = 1;
-
-            while (!dq.isEmpty() && dq.peekLast()[0] < nums[i]) {
-                int[] p = dq.pollLast();
-                cnt += p[1];
-                cost += (long) (nums[i] - p[0]) * p[1];
+        int n = nums.length;
+        long[] val = new long[n];
+        int[] cnt = new int[n];
+        int head = n, tail = n - 1; 
+        long cost = 0, ans = 0;
+        int r = n - 1;
+        for (int l = n - 1; l >= 0; l--) {
+            int c = 1;
+            while (head <= tail && val[head] <= nums[l]) {
+                cost += (nums[l] - val[head]) * (long) cnt[head];
+                c += cnt[head];
+                head++;
             }
-
-            dq.addLast(new int[]{nums[i], cnt});
-
+            head--;
+            val[head] = nums[l]; cnt[head] = c;
             while (cost > k) {
-                int[] p = dq.pollFirst();
-                cost -= p[0] - nums[j--];
-
-                if (--p[1] > 0)
-                    dq.addFirst(p);
+                cost -= val[tail] - nums[r];
+                if (--cnt[tail] == 0) tail--;
+                r--;
             }
-
-            ans += j - i + 1;
+            ans += r - l + 1;
         }
-
         return ans;
     }
 }
