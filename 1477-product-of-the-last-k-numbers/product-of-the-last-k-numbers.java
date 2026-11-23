@@ -1,19 +1,34 @@
 class ProductOfNumbers {
-    List<Integer> a = new ArrayList<>();
+    private List<Integer> nums;
+    private int n;
 
-    public ProductOfNumbers() {}
+    public ProductOfNumbers() {
+        nums = new ArrayList<>();
+        nums.add(1);
+        n = 0;
+    }
 
     public void add(int num) {
-        a.add(num);
+        if (num == 0) {
+            nums.clear();
+            nums.add(1);
+            n = 0;
+            return;
+        }
+
+        nums.add(nums.get(n) * num);
+        n++;
     }
 
     public int getProduct(int k) {
-        int n = a.size(), prod = 1;
-        for (int i = n - k; i < n; i++)
-            prod *= a.get(i);
-        return prod;
+        if (k > n) {
+            return 0;
+        }
+
+        return nums.get(n) / nums.get(n - k);
     }
 }
+
 /**
  * Your ProductOfNumbers object will be instantiated and called as such:
  * ProductOfNumbers obj = new ProductOfNumbers();
