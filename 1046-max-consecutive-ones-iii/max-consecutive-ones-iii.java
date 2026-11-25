@@ -1,7 +1,4 @@
 class Solution {
-    static{
-        for(int i = 0; i < 1000; i++){(new Solution()).longestOnes(new int[0], 0);}
-    }
     public int longestOnes(int[] nums, int k) {
         
         int l = 0, r = 0, max = 0, zeros = 0;
